@@ -5,6 +5,7 @@ from sklearn.model_selection import train_test_split
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
+import matplotlib.pyplot as plt
 
 # -----------------------------
 # 1. Dataset Generation
@@ -111,3 +112,47 @@ print("Test RMSE (bandwidth, power):", rmse)
 # -----------------------------
 for i in range(5):
     print(f"User {i}: Allocated bandwidth={y_pred[i,0]:.2f}, power={y_pred[i,1]:.2f}, demand={df.iloc[i]['demand']:.2f}")
+
+#visualise results
+# Assuming these are available from your dataset/model
+# y_true and y_pred (columns: [bandwidth, power])
+# energy (actual energy consumption per user/time step)
+# time_steps = np.arange(len(y_true))
+
+energy = y_true[:, 0] * y_true[:, 1]  # True bandwidth * True power (array shape = (600,))
+time_steps = np.arange(len(y_true))  # x-axis
+
+
+# 1. Bandwidth & Power Comparison
+plt.figure(figsize=(14,6))
+plt.plot(time_steps, y_true[:,0], label='True Bandwidth', color='blue', alpha=0.7)
+plt.plot(time_steps, y_pred[:,0], label='Predicted Bandwidth', color='cyan', linestyle='--')
+plt.plot(time_steps, y_true[:,1], label='True Power', color='orange', alpha=0.7)
+plt.plot(time_steps, y_pred[:,1], label='Predicted Power', color='red', linestyle='--')
+plt.xlabel("Time Step / User Index")
+plt.ylabel("Allocation")
+plt.title("Resource Allocation: Bandwidth & Power")
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# 2. Energy Consumption Comparison
+plt.figure(figsize=(12,5))
+plt.plot(time_steps, energy, label='Actual Energy', color='green', alpha=0.7)
+plt.plot(time_steps, y_pred[:,0]*y_pred[:,1], label='Predicted Energy Estimate', color='magenta', linestyle='--')
+plt.xlabel("Time Step / User Index")
+plt.ylabel("Energy")
+plt.title("Energy Efficiency in Resource Allocation")
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# 3. Combined QoS Check (throughput vs latency if available)
+if 'throughput' in globals() and 'latency' in globals():
+    plt.figure(figsize=(6,5))
+    plt.scatter(throughput, latency, alpha=0.5)
+    plt.xlabel("Throughput")
+    plt.ylabel("Latency")
+    plt.title("QoS: Throughput vs Latency")
+    plt.grid(True)
+    plt.show()
